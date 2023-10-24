@@ -14,34 +14,31 @@ public class DataStreamMap extends ScalarFunction {
         //Object... values
         //return Row.of(a, "pre-" + a);
         // Row.of(row.getField(0))
-           Row row = new Row(values.length);
+        Row row = new Row(values.length);
         for (int i = 0; i < values.length; i++) {
-//                if (row.getField))
-//                row.setField(i, values[i]);
-//            }
-//            return row;
+            //if (row.getField))
+            row.setField(i, values[i]);
+        }
+        return row;
 
 
-        int len = from.length;
-        if (from.getArity() != len) {
-            throw new RuntimeException("Row arity of from does not match serializers.");
-        }
-        Row result = new Row(len);
-        for (int i = 0; i < len; i++) {
-            Object fromField = from.getField(i);
-            if (fromField != null) {
-                Object copy = fieldSerializers[i].copy(fromField);
-                result.setField(i, copy);
+            /*int len = from.length;
+            if (from.getArity() != len) {
+                throw new RuntimeException("Row arity of from does not match serializers.");
             }
-            else {
-                result.setField(i, null);
+            Row result = new Row(len);
+            for (int i = 0; i < len; i++) {
+                Object fromField = from.getField(i);
+                if (fromField != null) {
+                    Object copy = fieldSerializers[i].copy(fromField);
+                    result.setField(i, copy);
+                } else {
+                    result.setField(i, null);
+                }
             }
-        }
-        return result;
+            return result;*/
 
     }
-
-
 
 
     @Override
