@@ -3,6 +3,7 @@ package org.myorg.quickstart;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.shaded.zookeeper3.org.apache.jute.compiler.JRecord;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.flink.types.Row;
 
@@ -10,33 +11,39 @@ import java.util.Arrays;
 
 public class DataStreamMap extends ScalarFunction {
 
-    public Row eval(Object... values) {
-        //Object... values
-        //return Row.of(a, "pre-" + a);
-        // Row.of(row.getField(0))
+    public Row apply(Object... values) throws Exception{
+
+        if(values == null){
+            return null;
+        }
         Row row = new Row(values.length);
         for (int i = 0; i < values.length; i++) {
-            //if (row.getField))
             row.setField(i, values[i]);
         }
         return row;
 
+    }
 
-            /*int len = from.length;
-            if (from.getArity() != len) {
+    public Row apply(Row record) {
+
+          // int len = record.length;
+          /*  if (record.getArity() != len) {
                 throw new RuntimeException("Row arity of from does not match serializers.");
-            }
+            }*/
+            int len = record.getArity();
             Row result = new Row(len);
+
+            //Object[] fields = new Object[record.getArity()];
             for (int i = 0; i < len; i++) {
-                Object fromField = from.getField(i);
+                Object fromField = record.getField(i);
                 if (fromField != null) {
-                    Object copy = fieldSerializers[i].copy(fromField);
+                    Object copy = record.getField((Integer) fromField);
                     result.setField(i, copy);
                 } else {
                     result.setField(i, null);
                 }
             }
-            return result;*/
+            return result;
 
     }
 
