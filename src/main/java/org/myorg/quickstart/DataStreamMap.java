@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 public class DataStreamMap extends ScalarFunction {
 
-    public Row apply(Object... values) throws Exception{
+    public Row eval(Object... values) throws Exception{
 
         if(values == null){
             return null;
@@ -24,28 +24,24 @@ public class DataStreamMap extends ScalarFunction {
 
     }
 
-    public Row apply(Row record) {
+   /* public Row eval(Row record) {
 
           // int len = record.length;
-          /*  if (record.getArity() != len) {
-                throw new RuntimeException("Row arity of from does not match serializers.");
-            }*/
+
             int len = record.getArity();
             Row result = new Row(len);
-
-            //Object[] fields = new Object[record.getArity()];
             for (int i = 0; i < len; i++) {
                 Object fromField = record.getField(i);
                 if (fromField != null) {
                     Object copy = record.getField((Integer) fromField);
                     result.setField(i, copy);
                 } else {
-                    result.setField(i, null);
+                    //result.setField(i, null);
                 }
             }
             return result;
 
-    }
+    }*/
 
 
     @Override

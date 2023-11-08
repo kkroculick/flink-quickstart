@@ -29,8 +29,8 @@ under the License.
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<flink.version>1.17.1</flink.version>
-		<target.java.version>1.8</target.java.version>
+		<flink.version>1.18.0</flink.version>
+		<target.java.version>17</target.java.version>
 		<scala.binary.version>2.12</scala.binary.version>
 		<maven.compiler.source>${target.java.version}</maven.compiler.source>
 		<maven.compiler.target>${target.java.version}</maven.compiler.target>
@@ -43,7 +43,7 @@ under the License.
 			<name>Apache Development Snapshot Repository</name>
 			<url>https://repository.apache.org/content/repositories/snapshots/</url>
 			<releases>
-				<enabled>false</enabled>
+				<enabled>true</enabled>
 			</releases>
 			<snapshots>
 				<enabled>true</enabled>
@@ -54,6 +54,7 @@ under the License.
 	<dependencies>
 		<!-- Apache Flink dependencies -->
 		<!-- These dependencies are provided, because they should not be packaged into the JAR file. -->
+		<!-- ${flink.version}-SNAPSHOT -->
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-streaming-java</artifactId>
@@ -96,7 +97,16 @@ under the License.
 			<version>${flink.version}</version>
 			<scope>provided</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-table-common</artifactId>
+			<version>${flink.version}</version>
+		</dependency>
+	<!--	<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-runtime-web</artifactId>
+			<version>${flink.version}</version>
+		</dependency>-->
 		<!-- Add connector dependencies here. They must be in the default scope (compile). -->
 		<!--connectors-->
 		<dependency>
@@ -112,12 +122,12 @@ under the License.
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-connector-kafka</artifactId>
-			<version>${flink.version}</version>
+			<version>3.0.1-1.18</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-connector-jdbc</artifactId>
-			<version>3.1.0-1.17</version>
+			<version>3.1.1-1.17</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
@@ -127,7 +137,7 @@ under the License.
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-connector-mongodb</artifactId>
-			<version>1.0.1-1.17</version>
+			<version>1.0.2-1.17</version>
 		</dependency>
 		<dependency>
 			<groupId>com.mysql</groupId>
@@ -162,11 +172,6 @@ under the License.
 			<artifactId>log4j-core</artifactId>
 			<version>${log4j.version}</version>
 			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.flink</groupId>
-			<artifactId>flink-table-common</artifactId>
-			<version>1.17.1</version>
 		</dependency>
 	</dependencies>
 

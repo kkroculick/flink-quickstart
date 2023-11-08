@@ -18,13 +18,18 @@
 
 package org.myorg.quickstart;
 
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.connector.jdbc.catalog.JdbcCatalog;
 import org.apache.flink.connector.jdbc.table.JdbcConnectorOptions;
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.table.api.*;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.ObjectPath;
 import org.apache.flink.table.functions.ScalarFunction;
+import org.apache.flink.table.functions.TableFunction;
 
 import java.util.Arrays;
 
@@ -45,10 +50,21 @@ import static org.apache.flink.table.api.Expressions.*;
 public class DataStreamJob {
 
     public static void main(String[] args) throws Exception {
+
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        DataStream<Tuple2<String, Integer>> dataStream = env
+                .socketTextStream("localhost", 9999)
+                .flatMap(new Splitter())
+                .keyBy(value -> value.f0)
+                .window(TumblingProcessingTimeWindows.of(Time.seconds(5)))
+                .sum(1);
+        dataStream.print();
+        env.execute("Window WordCount");
+
         // Sets up the execution environment, which is the main entry point
         // to building Flink applications.
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
+       // StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+      //  StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
 
           /* EnvironmentSettings settings = EnvironmentSettings
                 .newInstance()
@@ -71,8 +87,7 @@ public class DataStreamJob {
         String mongoAppDb = "flinkdb";
         String collection = "employees";
 
-        // Default catalog MUST CREATE TABLES IN MYSQL MANUALLY OR USE AJDBC HELPER FIRS
-
+        // default catalog MUST CREATE TABLES IN MYSQL MANUALLY OR USE AJDBC HELPER FIRS
         /*String sqlCreateEmp = "CREATE TABLE IF NOT EXISTS employees " +
                 "(emp_no INT, birth_date DATE, first_name STRING, last_name STRING," +
                 "gender STRING, hire_date DATE, PRIMARY KEY (emp_no) NOT ENFORCED) " +
@@ -114,7 +129,7 @@ public class DataStreamJob {
         Table kafkaEmployees = tableEnv.from("employees-topic").select($("*"));*/
 
         // create mysql table in flink
-        String sqlCreateEmp2 = "CREATE TABLE IF NOT EXISTS employees2 " +
+       /* String sqlCreateEmp2 = "CREATE TABLE IF NOT EXISTS employees2 " +
                 " (emp_no INT, birth_date DATE, first_name STRING, " +
                 " last_name STRING, gender STRING, hire_date DATE) " +
                 " WITH ('connector' = 'jdbc', " +
@@ -123,8 +138,9 @@ public class DataStreamJob {
                 " 'username' = 'keith'," +
                 " 'password' = 'Password1', " +
                 " 'table-name' = 'employees2');";
-        tableEnv.executeSql(sqlCreateEmp2);
-//        // load table in mysql from kafka
+        tableEnv.executeSql(sqlCreateEmp2);*/
+
+        // load table in mysql from kafka
 //        String sqlLoadEmployeesTable = " INSERT INTO employees2 " +
 //                " SELECT emp_no, " +
 //                " birth_date," +
@@ -163,12 +179,13 @@ public class DataStreamJob {
         // tableResultMongo.execute().print();
         System.out.println(tableResultMongo.getJobClient().get().getJobStatus());*/
 
-        ScalarFunction func = new DataStreamMap();
+       // table function
+      /*  TableFunction func = new DataStreamFlatMap();
         tableEnv.registerFunction("func", func);
 
         Table employees2 = tableEnv.from("employees2").select($("*"));;
-        Table tableEmpNo = employees2.map(call("func", $("*")));
-        tableEmpNo.execute().print();
+        Table tableEmpNo = employees2.flatMap(call("func", $("*")));
+        tableEmpNo.execute().print();*/
         //Table tableEmpno = employees2.map(call("func"));
         //# specify the function without the input columns
         //table.map(func2).execute().print();
@@ -177,6 +194,7 @@ public class DataStreamJob {
         //Table table = input.map(call("func", $("emp_no")));
         //Table table = input.select($("emp_no"));
         //table.execute().print();*/
+
         /******************************************************************************
          // execute SELECT statement
          TableResult tableResult1 = tableEnv.executeSql("SELECT * FROM Orders");
@@ -316,7 +334,6 @@ public class DataStreamJob {
                 .option(JdbcConnectorOptions.SINK_BUFFER_FLUSH_MAX_ROWS, 1000)
                 .option(JdbcConnectorOptions.SINK_MAX_RETRIES, 3)
                 .build();*/
-
 
         //kafka
          /*TableEnvironment tEnv = TableEnvironment.create(settings);
