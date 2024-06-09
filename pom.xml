@@ -29,7 +29,7 @@ under the License.
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<flink.version>1.18.0</flink.version>
+		<flink.version>1.19.0</flink.version>
 		<target.java.version>17</target.java.version>
 		<scala.binary.version>2.12</scala.binary.version>
 		<maven.compiler.source>${target.java.version}</maven.compiler.source>
@@ -122,12 +122,14 @@ under the License.
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-connector-kafka</artifactId>
-			<version>3.0.1-1.18</version>
+			<!--<version>3.0.1-1.18</version>-->
+			<version>3.2.0-1.19</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-connector-jdbc</artifactId>
-			<version>3.1.1-1.17</version>
+			<!--<version>3.1.1-1.17</version>-->
+			<version>3.2.0-1.19</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
@@ -137,12 +139,13 @@ under the License.
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-connector-mongodb</artifactId>
-			<version>1.0.2-1.17</version>
+			<version>1.2.0-1.19</version>
+
 		</dependency>
 		<dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
-			<version>8.1.0</version>
+			<version>8.4.0</version>
 		</dependency>
 		<!-- Example:
 

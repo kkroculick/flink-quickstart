@@ -63,8 +63,8 @@ public class DataStreamJob {
 
         // Sets up the execution environment, which is the main entry point
         // to building Flink applications.
-       // StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-      //  StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
+        // StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        // StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
 
           /* EnvironmentSettings settings = EnvironmentSettings
                 .newInstance()
@@ -76,7 +76,7 @@ public class DataStreamJob {
         // set the batch runtime mode
         // env.setRuntimeMode(RuntimeExecutionMode.BATCH);*/
 
-        // variables- can move to a yaml
+        // variables - can move to a yaml
         String name = "mycatalog";
         String defaultDatabase = "employees";
         String username = "keith";
@@ -87,7 +87,7 @@ public class DataStreamJob {
         String mongoAppDb = "flinkdb";
         String collection = "employees";
 
-        // default catalog MUST CREATE TABLES IN MYSQL MANUALLY OR USE AJDBC HELPER FIRS
+        // default catalog MUST CREATE TABLES IN MYSQL MANUALLY OR USE A JDBC HELPER FIRS
         /*String sqlCreateEmp = "CREATE TABLE IF NOT EXISTS employees " +
                 "(emp_no INT, birth_date DATE, first_name STRING, last_name STRING," +
                 "gender STRING, hire_date DATE, PRIMARY KEY (emp_no) NOT ENFORCED) " +
