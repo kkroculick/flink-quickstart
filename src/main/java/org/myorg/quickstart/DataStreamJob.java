@@ -18,9 +18,13 @@
 
 package org.myorg.quickstart;
 
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.connector.jdbc.catalog.JdbcCatalog;
 import org.apache.flink.connector.jdbc.table.JdbcConnectorOptions;
+import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
@@ -51,7 +55,7 @@ public class DataStreamJob {
 
     public static void main(String[] args) throws Exception {
 
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+       /* StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         DataStream<Tuple2<String, Integer>> dataStream = env
                 .socketTextStream("localhost", 9999)
                 .flatMap(new Splitter())
@@ -59,7 +63,7 @@ public class DataStreamJob {
                 .window(TumblingProcessingTimeWindows.of(Time.seconds(5)))
                 .sum(1);
         dataStream.print();
-        env.execute("Window WordCount");
+        env.execute("Window WordCount");*/
 
         // Sets up the execution environment, which is the main entry point
         // to building Flink applications.
@@ -88,7 +92,8 @@ public class DataStreamJob {
         String collection = "employees";
 
         // default catalog MUST CREATE TABLES IN MYSQL MANUALLY OR USE A JDBC HELPER FIRS
-        /*String sqlCreateEmp = "CREATE TABLE IF NOT EXISTS employees " +
+        /**
+        String sqlCreateEmp = "CREATE TABLE IF NOT EXISTS employees " +
                 "(emp_no INT, birth_date DATE, first_name STRING, last_name STRING," +
                 "gender STRING, hire_date DATE, PRIMARY KEY (emp_no) NOT ENFORCED) " +
                 "WITH " +
@@ -101,10 +106,11 @@ public class DataStreamJob {
         tableEnv.executeSql(sqlCreateEmp);
 
         Table tableResultEmp = tableEnv.sqlQuery("SELECT * FROM employees");
-        tableResultEmp .execute().print();*/
+        tableResultEmp .execute().print();
+        **/
 
-
-   /*     // create table with kafka topic
+        /*
+        // create table with kafka topic
         tableEnv.executeSql("CREATE TABLE employees-topic " +
                 " ( emp_no INT, " +
                 " birth_date DATE, " +
@@ -153,7 +159,7 @@ public class DataStreamJob {
         //*** or Table employees2 = kafkaEmployees.select($"*");
 
         // create mongodb collection in flink
-/*        String sqlCreateEmpMongo = "CREATE TABLE IF NOT EXISTS employees3 " +
+        /*String sqlCreateEmpMongo = "CREATE TABLE IF NOT EXISTS employees3 " +
                 " (emp_no INT, " +
                 " birth_date TIMESTAMP_LTZ(3), " +
                 " first_name STRING, " +
@@ -179,8 +185,8 @@ public class DataStreamJob {
         // tableResultMongo.execute().print();
         System.out.println(tableResultMongo.getJobClient().get().getJobStatus());*/
 
-       // table function
-      /*  TableFunction func = new DataStreamFlatMap();
+        // table function
+        /*TableFunction func = new DataStreamFlatMap();
         tableEnv.registerFunction("func", func);
 
         Table employees2 = tableEnv.from("employees2").select($("*"));;
@@ -349,6 +355,29 @@ public class DataStreamJob {
                 "    'scan.startup.mode' = 'earliest-offset',\n" +
                 "    'format'    = 'csv'\n" +
                 ")");*/
+
+        /* Kafka DataSream */
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        //Kafka Source
+        KafkaSource<String> source = KafkaSource.<String>builder()
+                .setBootstrapServers("localhost:9092")
+                .setTopics("my-topic")
+                .setGroupId("my-group-id")
+                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setValueOnlyDeserializer(new SimpleStringSchema())
+                .build();
+        //kafkaSource.builder().setTopics("topic-a", "topic-b")
+        //KafkaSource.builder().setTopicPattern("topic.*");
+
+        //final HashSet<TopicPartition> partitionSet = new HashSet<>(Arrays.asList(
+        //new TopicPartition("topic-a", 0),    // Partition 0 of topic "topic-a"
+        //new TopicPartition("topic-b", 5)));  // Partition 5 of topic "topic-b"
+        // KafkaSource.builder().setPartitions(partitionSet);
+        // deprecated - FlinkKafkaConsumer is deprecated
+        DataStream<String> stream = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
+       //DataStream<Tuple2<String, Integer>> processedStream = stream
+        //stream.print();
+      //  env.execute();
 
     }
 }
