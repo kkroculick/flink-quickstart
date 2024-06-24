@@ -7,4 +7,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 public class JdbcUtils {
+
+    //this is a place holder util class to run jdbc ddl statements with commons dbutil
 }

@@ -11,9 +11,9 @@ import java.util.Arrays;
 
 public class DataStreamMap extends ScalarFunction {
 
-    public Row eval(Object... values) throws Exception{
+    public Row eval(Object... values) throws Exception {
 
-        if(values == null){
+        if (values == null) {
             return null;
         }
         Row row = new Row(values.length);

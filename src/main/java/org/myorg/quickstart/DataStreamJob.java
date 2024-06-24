@@ -22,10 +22,16 @@ import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.jdbc.catalog.JdbcCatalog;
 import org.apache.flink.connector.jdbc.table.JdbcConnectorOptions;
+
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
+//import org.apache.kafka.common.serialization.*;
+import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
@@ -35,10 +41,14 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.ObjectPath;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.flink.table.functions.TableFunction;
+import org.apache.kafka.common.serialization.StringDeserializer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.apache.flink.table.api.Expressions.*;
+
 
 /**
  * Skeleton for a Flink DataStream Job.
@@ -73,8 +83,8 @@ public class DataStreamJob {
 
           /* EnvironmentSettings settings = EnvironmentSettings
                 .newInstance()
-                //.inStreamingMode()
-                .inBatchMode()
+                .inStreamingMode()
+                //.inBatchMode()
                 .build();
         TableEnvironment tableEnv = TableEnvironment.create(settings);
         // Streaming runtime mode, on the other hand, can be used for both bounded and unbounded jobs.
@@ -94,21 +104,21 @@ public class DataStreamJob {
 
         // default catalog MUST CREATE TABLES IN MYSQL MANUALLY OR USE A JDBC HELPER FIRS
         /**
-        String sqlCreateEmp = "CREATE TABLE IF NOT EXISTS employees " +
-                "(emp_no INT, birth_date DATE, first_name STRING, last_name STRING," +
-                "gender STRING, hire_date DATE, PRIMARY KEY (emp_no) NOT ENFORCED) " +
-                "WITH " +
-                "('connector' = 'jdbc'," +
-                "'driver' = 'com.mysql.cj.jdbc.Driver'," +
-                "'url' = 'jdbc:mysql://localhost:3306/employees'," +
-                "'username' = 'keith', " +
-                "'password' = 'Password1', " +
-                "'table-name' = 'employees');";
-        tableEnv.executeSql(sqlCreateEmp);
+         String sqlCreateEmp = "CREATE TABLE IF NOT EXISTS employees " +
+         "(emp_no INT, birth_date DATE, first_name STRING, last_name STRING," +
+         "gender STRING, hire_date DATE, PRIMARY KEY (emp_no) NOT ENFORCED) " +
+         "WITH " +
+         "('connector' = 'jdbc'," +
+         "'driver' = 'com.mysql.cj.jdbc.Driver'," +
+         "'url' = 'jdbc:mysql://localhost:3306/employees'," +
+         "'username' = 'keith', " +
+         "'password' = 'Password1', " +
+         "'table-name' = 'employees');";
+         tableEnv.executeSql(sqlCreateEmp);
 
-        Table tableResultEmp = tableEnv.sqlQuery("SELECT * FROM employees");
-        tableResultEmp .execute().print();
-        **/
+         Table tableResultEmp = tableEnv.sqlQuery("SELECT * FROM employees");
+         tableResultEmp .execute().print();
+         **/
 
         /*
         // create table with kafka topic
@@ -136,7 +146,7 @@ public class DataStreamJob {
         Table kafkaEmployees = tableEnv.from("employees-topic").select($("*"));*/
 
         // create mysql table in flink
-       /* String sqlCreateEmp2 = "CREATE TABLE IF NOT EXISTS employees2 " +
+       /*String sqlCreateEmp2 = "CREATE TABLE IF NOT EXISTS employees2 " +
                 " (emp_no INT, birth_date DATE, first_name STRING, " +
                 " last_name STRING, gender STRING, hire_date DATE) " +
                 " WITH ('connector' = 'jdbc', " +
@@ -257,16 +267,12 @@ public class DataStreamJob {
         Table kafkaEmployees = tableEnv.from("employees").select($("*"));
         kafkaEmployees.execute().print();*/
 
-
-
-
         /*run multiple INSERT queries on the registered source table and emit the result to registered sink tables
         //StatementSet stmtSet = tEnv.createStatementSet();
         //stmtSet.addInsertSql()
         //TableResult tableResult2 = stmtSet.execute();
         //System.out.println(tableResult2.getJobClient().get().getJobStatus());
         */
-
 
         /* table pipeline method defines a complete end-to-end pipeline emitting the source table to a registered sink table.
         // compute a result Table using Table API operators and/or SQL queries
@@ -321,7 +327,6 @@ public class DataStreamJob {
                 .option(JdbcConnectorOptions.TABLE_NAME, "employees")
                 .build();*/
 
-
         //register
         //tableEnv.createTable("employees", sourceDescriptor);
 
@@ -357,60 +362,72 @@ public class DataStreamJob {
                 "    'format'    = 'csv'\n" +
                 ")");*/
 
-        /* Kafka DataSream */
+        /* Kafka DataStream */
+        String brokers = "localhost:9092";
+        String topic = "my-topic";
+        String groupid = "my-group-id";
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
         //Kafka Source
-        KafkaSource<String> source = KafkaSource.<String>builder()
-                .setBootstrapServers("localhost:9092")
-                .setTopics("my-topic")
-                .setGroupId("my-group-id")
+        /* KafkaSource<String> source = KafkaSource.<String>builder()
+                .setBootstrapServers(brokers)
+                .setTopics(topic)
+                .setGroupId(groupid)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
+        KafkaSource.<String>builder()
+                .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(StringDeserializer.class));
+        */
+
+        // multi-topic
         //kafkaSource.builder().setTopics("topic-a", "topic-b")
         //KafkaSource.builder().setTopicPattern("topic.*");
 
-        //final HashSet<TopicPartition> partitionSet = new HashSet<>(Arrays.asList(
-        //new TopicPartition("topic-a", 0),    // Partition 0 of topic "topic-a"
-        //new TopicPartition("topic-b", 5)));  // Partition 5 of topic "topic-b"
-        // KafkaSource.builder().setPartitions(partitionSet);
-        // deprecated - FlinkKafkaConsumer is deprecated
+        // multi-partition
+        /*final HashSet<TopicPartition> partitionSet = new HashSet<>(Arrays.asList(
+            //new TopicPartition("topic-a", 0),    // Partition 0 of topic "topic-a"
+            //new TopicPartition("topic-b", 5)));  // Partition 5 of topic "topic-b"
+        //KafkaSource.builder().setPartitions(partitionSet);*/
 
-        DataStream<String> stream = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
-        //DataStream<Tuple2<String, Integer>> processedStream = stream
-        //stream.print();
-        //env.execute();
-      
-      
-      
-      /* DataStream<Tuple2<String, Integer>> wordCounts = env.fromElements(
+        // add data from collection
+        /* DataStream<String> stream = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
+            //DataStream<Tuple2<String, Integer>> processedStream = stream
+            //stream.print();
+        //env.execute();*/
+
+        // deprecated - FlinkKafkaConsumer is deprecated
+        List<String> data = new ArrayList<String>();
+        data.add("one message");
+        data.add("two message");
+        data.add("three message");
+        DataStream<String> stream = env.fromData(data);
+
+        KafkaSink<String> sink = KafkaSink.<String>builder()
+                .setBootstrapServers(brokers)
+                .setRecordSerializer(KafkaRecordSerializationSchema.builder()
+                        .setTopic(topic)
+                        .setValueSerializationSchema(new SimpleStringSchema())
+                        .build()
+                )
+                .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+                .build();
+
+        stream.sinkTo(sink);
+        env.execute();
+
+        /*DataStream<Tuple2<String, Integer>> wordCounts = env.fromElements(
                 new Tuple2<String, Integer>("hello", 1),
                 new Tuple2<String, Integer>("world", 2));
-
         wordCounts.map(new MapFunction<Tuple2<String, Integer>, Integer>() {
             @Override
             public Integer map(Tuple2<String, Integer> value) throws Exception {
                 return value.f1;
             }
         });
-
-        wordCounts.keyBy(value -> value.f0);
         */
-
-        DataStream<String> control = env
-        .fromElements("DROP", "IGNORE")
-        .keyBy(x -> x);
-
-    DataStream<String> streamOfWords = env
-        .fromElements("Apache", "DROP", "Flink", "IGNORE")
-        .keyBy(x -> x);
-  
-    control
-        .connect(streamOfWords)
-        .flatMap(new ControlFunction())
-        .print();
-
-    env.execute();
+        // wordCounts.keyBy(value -> value.f0).reduce(((stringIntegerTuple2, t1) -> stringIntege));
+        // assertThat(collect.get(0)).isEqualTo(90);
 
 
     }
