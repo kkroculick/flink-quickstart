@@ -66,6 +66,7 @@ public class DataStreamJob {
 
     public static void main(String[] args) throws Exception {
 
+        //createLocalEnvironment();
        /* StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         DataStream<Tuple2<String, Integer>> dataStream = env
                 .socketTextStream("localhost", 9999)
