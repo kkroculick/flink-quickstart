@@ -16,38 +16,19 @@
  * limitations under the License.
  */
 
-package org.myorg.quickstart;
+package org.myorg.quickstart.job;
 
-import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.connector.base.DeliveryGuarantee;
-import org.apache.flink.connector.jdbc.catalog.JdbcCatalog;
-import org.apache.flink.connector.jdbc.table.JdbcConnectorOptions;
 
-import org.apache.flink.connector.kafka.source.KafkaSource;
-import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 //import org.apache.kafka.common.serialization.*;
-import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.table.api.*;
-import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.apache.flink.table.catalog.ObjectPath;
-import org.apache.flink.table.functions.ScalarFunction;
-import org.apache.flink.table.functions.TableFunction;
-import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import static org.apache.flink.table.api.Expressions.*;
 
 
 /**
@@ -65,6 +46,22 @@ import static org.apache.flink.table.api.Expressions.*;
 public class DataStreamJob {
 
     public static void main(String[] args) throws Exception {
+
+        // variables - can move to a yaml
+        String name = "mycatalog";
+        String defaultDatabase = "employees";
+        String username = "keith";
+        String password = "Password1";
+        String baseUrl = "jdbc:mysql://localhost:3306";
+        String mongodb = "mongodb://localhost:27017";
+        String connector = "mongodb";
+        String mongoAppDb = "flinkdb";
+        String collection = "employees";
+
+        /*
+        File propertiesFile = new File(propertiesFilePath);
+        ParameterTool parameters = ParameterTool.fromPropertiesFile(propertiesFile);
+         */
 
         //createLocalEnvironment();
        /* StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -92,16 +89,7 @@ public class DataStreamJob {
         // set the batch runtime mode
         // env.setRuntimeMode(RuntimeExecutionMode.BATCH);*/
 
-        // variables - can move to a yaml
-        String name = "mycatalog";
-        String defaultDatabase = "employees";
-        String username = "keith";
-        String password = "Password1";
-        String baseUrl = "jdbc:mysql://localhost:3306";
-        String mongodb = "mongodb://localhost:27017";
-        String connector = "mongodb";
-        String mongoAppDb = "flinkdb";
-        String collection = "employees";
+
 
         // default catalog MUST CREATE TABLES IN MYSQL MANUALLY OR USE A JDBC HELPER FIRS
         /**

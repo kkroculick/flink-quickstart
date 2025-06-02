@@ -1,4 +1,4 @@
-package org.myorg.quickstart;
+package org.myorg.quickstart.util;
 
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;

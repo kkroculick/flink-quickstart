@@ -1,7 +1,6 @@
-package org.myorg.quickstart;
+package org.myorg.quickstart.processor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.table.api.*;
 import org.apache.flink.table.functions.TableFunction;
 import org.apache.flink.types.Row;
 

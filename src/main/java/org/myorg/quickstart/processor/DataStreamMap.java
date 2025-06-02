@@ -1,13 +1,9 @@
-package org.myorg.quickstart;
+package org.myorg.quickstart.processor;
 
-import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.shaded.zookeeper3.org.apache.jute.compiler.JRecord;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.flink.types.Row;
-
-import java.util.Arrays;
 
 public class DataStreamMap extends ScalarFunction {
 
