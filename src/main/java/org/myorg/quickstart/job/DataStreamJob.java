@@ -18,14 +18,22 @@
 
 package org.myorg.quickstart.job;
 
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.connector.base.DeliveryGuarantee;
-
-//import org.apache.kafka.common.serialization.*;
-import org.apache.flink.connector.kafka.sink.KafkaSink;
-import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.connector.base.DeliveryGuarantee;
+import org.apache.flink.table.api.*;
+import org.apache.flink.table.catalog.*;
+import org.apache.flink.table.catalog.hive.HiveCatalog;
+
+
+//import org.apache.kafka.common.serialization.*;
+
+import org.apache.flink.connector.kafka.sink.KafkaSink;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
+
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,8 +84,8 @@ public class DataStreamJob {
 
         // Sets up the execution environment, which is the main entry point
         // to building Flink applications.
-        // StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        // StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
 
           /* EnvironmentSettings settings = EnvironmentSettings
                 .newInstance()
@@ -92,8 +100,8 @@ public class DataStreamJob {
 
 
         // default catalog MUST CREATE TABLES IN MYSQL MANUALLY OR USE A JDBC HELPER FIRS
-        /**
-         String sqlCreateEmp = "CREATE TABLE IF NOT EXISTS employees " +
+
+       /*String sqlCreateEmp = "CREATE TABLE IF NOT EXISTS employees " +
          "(emp_no INT, birth_date DATE, first_name STRING, last_name STRING," +
          "gender STRING, hire_date DATE, PRIMARY KEY (emp_no) NOT ENFORCED) " +
          "WITH " +
@@ -106,8 +114,8 @@ public class DataStreamJob {
          tableEnv.executeSql(sqlCreateEmp);
 
          Table tableResultEmp = tableEnv.sqlQuery("SELECT * FROM employees");
-         tableResultEmp .execute().print();
-         **/
+         tableResultEmp .execute().print();*/
+
 
         /*
         // create table with kafka topic
@@ -221,6 +229,68 @@ public class DataStreamJob {
         /*JdbcCatalog catalog = new JdbcCatalog(name, defaultDatabase, username, password, baseUrl);
         tableEnv.registerCatalog("mycatalog", catalog);
         tableEnv.useCatalog("mycatalog");*/
+
+        //HiveCatalog catalog = new HiveCatalog("myhivecatalog", "default", "/home/keith/data/applications/hadoop/apache-hive-metastore-3.1.3-bin/conf");
+
+       // tableEnv.registerCatalog("myhivecatalog", catalog);
+       // tableEnv.useCatalog("myhivecatalog");
+        // tableEnv.executeSql("CREATE CATALOG hive_catalog WITH ('type'='iceberg', ...)");
+
+        System.setProperty("AWS_ACCESS_KEY_ID","ujLRhmhXRaJgoY8N50Om");
+        System.setProperty("AWS_SECRET_ACCESS_KEY","zVmoY4n5L50TqvT4Ru2PcqvlkVSaKQ8BPzS25I1N");
+        System.setProperty("AWS_REGION","us-east-1");
+
+
+        String hiveCatalog = """
+                CREATE CATALOG iceberg_catalog WITH (
+                'type'='iceberg',
+                'catalog-type'='hive',
+                'uri'='thrift://localhost:9083',
+                'warehouse'='s3a://dev-bucket/iceberg-data-bucket/',
+                's3.endpoint'='http://localhost:9000',
+                's3.access-key-id'='ujLRhmhXRaJgoY8N50Om',
+                's3.secret-access-key'='zVmoY4n5L50TqvT4Ru2PcqvlkVSaKQ8BPzS25I1N',
+                's3.path-style-access'='true',
+                's3.region'='us-east-1',
+                'catalog.io-impl'='org.apache.iceberg.aws.s3.S3FileIO')
+                """;
+        tableEnv.executeSql(hiveCatalog);
+
+        //create table from mysql
+        String sqlCreateEmp = "CREATE TABLE IF NOT EXISTS employees " +
+                "(emp_no INT, birth_date DATE, first_name STRING, last_name STRING," +
+                "gender STRING, hire_date DATE, PRIMARY KEY (emp_no) NOT ENFORCED) " +
+                "WITH " +
+                "('connector' = 'jdbc'," +
+                "'driver' = 'com.mysql.cj.jdbc.Driver'," +
+                "'url' = 'jdbc:mysql://localhost:3306/employees'," +
+                "'username' = 'keith', " +
+                "'password' = 'Password1', " +
+                "'table-name' = 'employees');";
+        tableEnv.executeSql(sqlCreateEmp);
+        ///Table tblEmployees = tableEnv.sqlQuery("SELECT * FROM employees");
+        //tblEmployees.execute().print();
+        //AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+        //write to iceberg table
+       /* CREATE TABLE test01 (col1 INT)
+        WITH (
+                'connector' = 'iceberg',
+                'catalog-name' = 'iceberg_catalog',
+                'catalog-database' = 'default',
+                'warehouse' = 's3://rmoff-lakehouse/00/',
+                'catalog-impl' = 'org.apache.iceberg.aws.glue.GlueCatalog',
+                'ioImpl' = 'org.apache.iceberg.aws.s3.S3FileIO');*/
+
+        String testTable = """ 
+                CREATE TABLE IF NOT EXISTS `iceberg_catalog`.`default`.`sample` (
+                id BIGINT COMMENT 'unique id',
+                data STRING);
+                """;
+
+      //  String insertStmt = "INSERT INTO mycatalog.employees.employees_copy SELECT * FROM mycatalog.employees.employees";
+        tableEnv.executeSql(testTable);
+
+      //  System.out.println(tblEmployees.getJobClient().get().getJobStatus());
 
         //using jdbc catalog- tables are registered by default
         /*Table employees = tableEnv.from("employees");
@@ -355,7 +425,7 @@ public class DataStreamJob {
         String brokers = "localhost:9092";
         String topic = "my-topic";
         String groupid = "my-group-id";
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        //StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         //Kafka Source
         /* KafkaSource<String> source = KafkaSource.<String>builder()
@@ -386,7 +456,7 @@ public class DataStreamJob {
         //env.execute();*/
 
         // deprecated - FlinkKafkaConsumer is deprecated
-        List<String> data = new ArrayList<String>();
+    /*    List<String> data = new ArrayList<String>();
         data.add("one message");
         data.add("two message");
         data.add("three message");
@@ -403,7 +473,7 @@ public class DataStreamJob {
                 .build();
 
         stream.sinkTo(sink);
-        env.execute();
+        env.execute();*/
 
         /*DataStream<Tuple2<String, Integer>> wordCounts = env.fromElements(
                 new Tuple2<String, Integer>("hello", 1),
