@@ -18,6 +18,7 @@
 
 package org.myorg.quickstart.job;
 
+import com.esotericsoftware.kryo.serializers.JavaSerializer;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
@@ -34,8 +35,8 @@ import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 
 
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -84,9 +85,18 @@ public class DataStreamJob {
 
         // Sets up the execution environment, which is the main entry point
         // to building Flink applications.
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
 
+
+
+
+
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+       // Class<?> arraysListClass = Arrays.asList(0).getClass();
+        //env.getConfig().addDefaultKryoSerializer((Class<?>) Arrays.asList().getClass(), JavaSerializer.class);
+
+     //   env.getConfig().addDefaultKryoSerializer(arraysListClass, JavaSerializer.class);
+        StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
           /* EnvironmentSettings settings = EnvironmentSettings
                 .newInstance()
                 .inStreamingMode()
@@ -96,7 +106,6 @@ public class DataStreamJob {
         // Streaming runtime mode, on the other hand, can be used for both bounded and unbounded jobs.
         // set the batch runtime mode
         // env.setRuntimeMode(RuntimeExecutionMode.BATCH);*/
-
 
 
         // default catalog MUST CREATE TABLES IN MYSQL MANUALLY OR USE A JDBC HELPER FIRS
@@ -232,32 +241,20 @@ public class DataStreamJob {
 
         //HiveCatalog catalog = new HiveCatalog("myhivecatalog", "default", "/home/keith/data/applications/hadoop/apache-hive-metastore-3.1.3-bin/conf");
 
-       // tableEnv.registerCatalog("myhivecatalog", catalog);
-       // tableEnv.useCatalog("myhivecatalog");
+        // tableEnv.registerCatalog("myhivecatalog", catalog);
+        // tableEnv.useCatalog("myhivecatalog");
         // tableEnv.executeSql("CREATE CATALOG hive_catalog WITH ('type'='iceberg', ...)");
 
-        System.setProperty("AWS_ACCESS_KEY_ID","ujLRhmhXRaJgoY8N50Om");
-        System.setProperty("AWS_SECRET_ACCESS_KEY","zVmoY4n5L50TqvT4Ru2PcqvlkVSaKQ8BPzS25I1N");
-        System.setProperty("AWS_REGION","us-east-1");
+        System.setProperty("AWS_ACCESS_KEY_ID", "ujLRhmhXRaJgoY8N50Om");
+        System.setProperty("AWS_SECRET_ACCESS_KEY", "zVmoY4n5L50TqvT4Ru2PcqvlkVSaKQ8BPzS25I1N");
+        System.setProperty("AWS_REGION", "us-east-1");
 
-
-        String hiveCatalog = """
-                CREATE CATALOG iceberg_catalog WITH (
-                'type'='iceberg',
-                'catalog-type'='hive',
-                'uri'='thrift://localhost:9083',
-                'warehouse'='s3a://dev-bucket/iceberg-data-bucket/',
-                's3.endpoint'='http://localhost:9000',
-                's3.access-key-id'='ujLRhmhXRaJgoY8N50Om',
-                's3.secret-access-key'='zVmoY4n5L50TqvT4Ru2PcqvlkVSaKQ8BPzS25I1N',
-                's3.path-style-access'='true',
-                's3.region'='us-east-1',
-                'catalog.io-impl'='org.apache.iceberg.aws.s3.S3FileIO')
-                """;
-        tableEnv.executeSql(hiveCatalog);
+      /*  GenericInMemoryCatalog catalog = new GenericInMemoryCatalog("gen_catalog");
+        tableEnv.registerCatalog("gen_catalog", catalog);
+        tableEnv.useCatalog("gen_catalog");*/
 
         //create table from mysql
-        String sqlCreateEmp = "CREATE TABLE IF NOT EXISTS employees " +
+      String sqlCreateEmp = "CREATE TABLE IF NOT EXISTS employees " +
                 "(emp_no INT, birth_date DATE, first_name STRING, last_name STRING," +
                 "gender STRING, hire_date DATE, PRIMARY KEY (emp_no) NOT ENFORCED) " +
                 "WITH " +
@@ -268,29 +265,70 @@ public class DataStreamJob {
                 "'password' = 'Password1', " +
                 "'table-name' = 'employees');";
         tableEnv.executeSql(sqlCreateEmp);
-        ///Table tblEmployees = tableEnv.sqlQuery("SELECT * FROM employees");
-        //tblEmployees.execute().print();
-        //AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
-        //write to iceberg table
-       /* CREATE TABLE test01 (col1 INT)
-        WITH (
-                'connector' = 'iceberg',
-                'catalog-name' = 'iceberg_catalog',
-                'catalog-database' = 'default',
-                'warehouse' = 's3://rmoff-lakehouse/00/',
-                'catalog-impl' = 'org.apache.iceberg.aws.glue.GlueCatalog',
-                'ioImpl' = 'org.apache.iceberg.aws.s3.S3FileIO');*/
+        Table tblEmployees = tableEnv.sqlQuery("SELECT * FROM employees");
+        //tblEmployees.execute().print();*/
 
-        String testTable = """ 
-                CREATE TABLE IF NOT EXISTS `iceberg_catalog`.`default`.`sample` (
+
+       String icebergCatalog = """
+                CREATE CATALOG iceberg_catalog WITH (
+                         'type'='iceberg',
+                         'catalog-type'='hive',
+                         'uri'='thrift://localhost:9083',
+                         'warehouse'='s3://dev-bucket/iceberg-data-bucket/',
+                         's3.endpoint'='http://localhost:9000',
+                         's3.access-key-id'='ujLRhmhXRaJgoY8N50Om',
+                         's3.secret-access-key'='zVmoY4n5L50TqvT4Ru2PcqvlkVSaKQ8BPzS25I1N',
+                         's3.path-style-access'='true',
+                         's3.region'='us-east-1',
+                         'catalog.io-impl'='org.apache.iceberg.aws.s3.S3FileIO')
+                """;
+
+        tableEnv.executeSql(icebergCatalog);
+        tableEnv.useCatalog("iceberg_catalog");
+
+
+        /*String sqlCreateEmpIce = "CREATE TABLE IF NOT EXISTS employees_copy " +
+                "(emp_no INT, birth_date DATE, first_name STRING, last_name STRING," +
+                "gender STRING, hire_date DATE, PRIMARY KEY (emp_no) NOT ENFORCED) ";*/
+
+        //tableEnv.executeSql(sqlCreateEmpIce);
+        //tableEnv.registerCatalog("catalog_name", catalog_instance).
+        //tableEnv.useDatabase("default");
+    String  copyTable = """
+                INSERT INTO employees_copy SELECT * FROM default_catalog.default_database.employees;
+                """;
+        tableEnv.executeSql(copyTable);
+
+    /*    String testTable = """
+                CREATE TABLE IF NOT EXISTS `iceberg_catalog`.`default`.`sample1` (
                 id BIGINT COMMENT 'unique id',
                 data STRING);
                 """;
-
-      //  String insertStmt = "INSERT INTO mycatalog.employees.employees_copy SELECT * FROM mycatalog.employees.employees";
         tableEnv.executeSql(testTable);
+       String  sql = """
+               INSERT INTO sample1 (id, data) values (1, 'test');
+                """;
+       tableEnv.executeSql(sql);*/
 
-      //  System.out.println(tblEmployees.getJobClient().get().getJobStatus());
+        //AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+        //write to iceberg table
+
+        /*String testTable = """
+                CREATE TABLE IF NOT EXISTS `iceberg_catalog`.`default`.`sample1` (
+                id BIGINT COMMENT 'unique id',
+                data STRING);
+                """;*/
+        //tableEnv.executeSql(testTable);
+
+      /*  String  copyTable = """
+                INSERT INTO iceberg_catalog.default.employees_copy SELECT * FROM default_catalog.employees.employees;
+                """;*/
+        // String copyTable = "CREATE TABLE iceberg_catalog.default.employees_copy LIKE iceberg_catalog.employees.employees;";
+
+        //  String insertStmt = "INSERT INTO mycatalog.employees.employees_copy SELECT * FROM mycatalog.employees.employees";
+        //tableEnv.executeSql(copyTable);
+
+        //  System.out.println(tblEmployees.getJobClient().get().getJobStatus());
 
         //using jdbc catalog- tables are registered by default
         /*Table employees = tableEnv.from("employees");
