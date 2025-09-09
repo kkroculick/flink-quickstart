@@ -112,19 +112,22 @@ under the License.
         </dependency>
 
         <!-- Add connector dependencies here. They must be in the default scope (compile). -->
+
         <!-- iceberg -->
+        <!-- dont use!!! unless using non shaded deps -->
         <!--<dependency>
             <groupId>org.apache.iceberg</groupId>
             <artifactId>iceberg-flink</artifactId>
             <version>1.9.2</version>
         </dependency> clash -->
+        <!-- dont use!!! unless using non shaded deps -->
         <!-- https://mvnrepository.com/artifact/org.apache.iceberg/iceberg-flink-1.20 -->
         <!-- <dependency>
              <groupId>org.apache.iceberg</groupId>
              <artifactId>iceberg-flink-1.20</artifactId>
              <version>1.9.2</version>
          </dependency>-->
-
+        <!-- use this shaded -->
         <dependency>
             <groupId>org.apache.iceberg</groupId>
             <artifactId>iceberg-flink-runtime-1.20</artifactId>
@@ -135,6 +138,7 @@ under the License.
             <artifactId>iceberg-aws</artifactId>
             <version>1.9.2</version>
         </dependency>
+
         <!-- hive & hadoop -->
         <dependency>
             <groupId>org.apache.hive</groupId>
@@ -142,6 +146,7 @@ under the License.
             <version>3.1.3</version>
             <scope>provided</scope>
         </dependency>
+        <!-- remove parquet not sure if we need this -->
         <dependency>
             <groupId>org.apache.hive</groupId>
             <artifactId>hive-metastore</artifactId>
@@ -165,10 +170,9 @@ under the License.
                 </exclusion>
             </exclusions>
             <scope>provided</scope>
-
         </dependency>
 
-        <!-- s3 -->
+        <!-- AWS all libs (s3) -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>bundle</artifactId>
@@ -212,10 +216,6 @@ under the License.
             <version>3.1.3</version>
         </dependency>
 
-
-
-
-
         <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-shaded-hadoop-3-uber -->
         <!--<dependency>
             <groupId>org.apache.flink</groupId>
@@ -232,29 +232,30 @@ under the License.
                     <version>5.0.0-1.20</version>
                     <type>pom</type>
                 </dependency>-->
-<!--
+
+        <!-- iceberg flink has this -->
+        <!--
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-parquet</artifactId>
             <version>${flink.version}</version>
-        </dependency>
--->
+        </dependency>-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-metrics-dropwizard</artifactId>
             <version>${flink.version}</version>
         </dependency>
+        <!-- shaded bundle -->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-sql-connector-hive-3.1.3_2.12</artifactId>
-            <version>1.20.2</version>
+            <version>${flink.version}</version>
         </dependency>
         <!--  unshaded hive -->
         <!-- <dependency>
               <groupId>org.apache.flink</groupId>
               <artifactId>flink-connector-hive_2.12</artifactId>
               <version>1.20.2</version>
-              <scope>provided</scope>
           </dependency>-->
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -301,6 +302,7 @@ under the License.
 
         <!-- Add logging framework, to produce console output when running in the IDE. -->
         <!-- These dependencies are excluded from the application JAR by default. -->
+        <!-- excludefrom hadoop -->
         <!-- run mvn dependency:tree -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
